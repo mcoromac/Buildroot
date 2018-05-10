@@ -1,0 +1,5 @@
+config BR2_PACKAGE_FINGERPRINT
+    bool "fingerprint"
+    select BR2_PACKAGE_LIBFPRINT
+    help
+      Our main fingerprint project
