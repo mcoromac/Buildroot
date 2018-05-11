@@ -8,7 +8,6 @@ FINGERPRINT_VERSION = 1.0.0
 FINGERPRINT_SITE = $(TOPDIR)/board/startrack/tab6/Scripts
 FINGERPRINT_SITE_METHOD = local
 FINGERPRINT_INSTALL_STAGING = YES
-FINGERPRINT_AUTORECONF = YES
 FINGERPRINT_DEPENDENCIES = libfprint
 
 #Tells what steps should be performed to build the package, @D is the build directory
@@ -20,7 +19,7 @@ endef
 
 #This just takes the cross compiled program and places it in the target files system
 define FINGERPRINT_INSTALL_TARGET_CMDS
-	$(INSTALL) -D -m 0755 $(@D)/HelloWorld $(TARGET_DIR)/HelloWorld
+	$(INSTALL) -D -m 0755 $(@D)/fingerprint $(TARGET_DIR)/home/Startrack/fingerprint
 
 endef
 

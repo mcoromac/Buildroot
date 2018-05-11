@@ -1,8 +1,8 @@
-OBJS=HelloWorld.o
-PROG=HelloWorld
+OBJS=fingerprint.o
+PROG=fingerprint
 LIBSF=-lfprint
 
-all:	HelloWorld
+all:	fingerprint
 
 HelloWorld:	$(OBJS)
 	$(CC) -o $(LDFLAGS) $(PROG) $(OBJS) $(LIBSF) --verbose
