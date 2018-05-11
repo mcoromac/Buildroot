@@ -412,6 +412,7 @@ int main(void)
 	getchar();
 
 	r = fp_init();
+	printf(r);
 	if (r < 0) {
 		fprintf(stderr, "Failed to initialize libfprint\n");
 		exit(1);

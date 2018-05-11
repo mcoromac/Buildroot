@@ -5,7 +5,7 @@
 ################################################################################
 
 FINGERPRINT_VERSION = 1.0.0
-FINGERPRINT_SITE = $(TOPDIR)/board/startrack/Scripts
+FINGERPRINT_SITE = $(TOPDIR)/board/startrack/tab6/Scripts
 FINGERPRINT_SITE_METHOD = local
 FINGERPRINT_INSTALL_STAGING = YES
 FINGERPRINT_AUTORECONF = YES
