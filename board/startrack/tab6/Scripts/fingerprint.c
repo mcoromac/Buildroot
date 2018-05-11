@@ -119,6 +119,7 @@ int main(void)
 	r = fp_init();
 	if (r < 0) {
 		fprintf(stderr, "Failed to initialize libfprint\n");
+		printf("r value: %d\n",r);
 		exit(1);
 	}
 	fp_set_debug(3);
