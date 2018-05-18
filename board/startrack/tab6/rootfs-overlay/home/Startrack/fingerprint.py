@@ -4,6 +4,7 @@ import pyfprint
 import os.path
 import spidev
 import time
+import signal
 from multiprocessing import Pool
 
 
@@ -59,7 +60,7 @@ def write_io_module(command, pin, state_verifier):
             break
 
 
-def read_io_module():
+def io_read():
     io_response = []
     read_io_pins = [0x00, 0x00]
     write_pins(slave_select, 0)
@@ -105,30 +106,26 @@ def deny():
 
 
 def load_fprints():
-    file_flag = True
-    txt_files = 1
-    fingerprints = []
-    while file_flag:
+    fps = []
+    if os.path.exists("fingerprints"):
         try:
-            with open("fingerprints/" + str(txt_files) + ".txt", "r") as myfile:
-                data = myfile.read().replace('\n', '')
-                fingerprints.append(pyfprint.Fprint(data))
-            txt_files += 1
-        except IOError:
-            file_flag = False
-            break
-    print "Fprints size:" + str(len(fingerprints))
-    return fingerprints
+            for name in os.listdir("fingerprints"):
+                fps.append(pyfprint.Fprint(open("fingerprints/" + name, 'r').read()))
+            print fps
+            print "Fprints size:" + str(len(fps))
+        except OSError:
+            print "No fingerprints"
+    return fps
 
 
-def leds_set(index_io, ports):
-    for led in range(len(ports)):
-        if ports[led]:
-            led0_on = [0x70, led + index_io, 0x01]
-            write_io_module(led0_on, led + index_io, 1)
+def io_write(pin_offset, pin_values):
+    for pin_index in range(len(pin_values)):
+        if pin_values[pin_index]:
+            pin_on = [0x70, pin_index + pin_offset, 0x01]
+            write_io_module(pin_on, pin_index + pin_offset, 1)
         else:
-            led0_off = [0x70, led + index_io, 0x00]
-            write_io_module(led0_off, led + index_io, 0)
+            pin_off = [0x70, pin_index + pin_offset, 0x00]
+            write_io_module(pin_off, pin_index + pin_offset, 0)
 
 
 def makedir():
@@ -149,17 +146,20 @@ def init():
 def add_fingerprint():
     cont = 0
     exist_flag = True
-    fn = "fingerprints/1.txt"
     while exist_flag:
         cont += 1
-        fn = "fingerprints/" + str(cont) + ".txt"
+        fn = "fingerprints/" + str(cont)
         exist_flag = os.path.isfile(fn)
 
     fp, img = dev.enroll_finger()
     print "Enrollment finished"
-    f = open(fn, "w+")
-    f.write(fp.data())
-    print "Writing file /fingerprints/" + str(cont) + ".txt"
+    file = open(fn, "wb")
+    file.write(bytes(fp.data()))
+    print "Writing file /fingerprints/" + str(cont)
+
+
+def io_button_pressed(io_module_input):
+    return io_module_input[1] & 0x02
 
 
 spi = spidev.SpiDev()
@@ -171,34 +171,35 @@ spi_setup()
 
 makedir()
 device_opened = False
+fprints = []
 print "Start"
 while True:
     try:
         if not device_opened:
             device_opened, dev = init()
+            fprints = load_fprints()
     except IndexError:
-        print "Plug a supported device"
+        print "Connect a supported device"
         time.sleep(3)
     if device_opened:
-        response = read_io_module()
-        button_pressed = response[1] & 0x02
-        if button_pressed:
+        if io_button_pressed(io_read()):
             print "Enroll finger"
-            leds_set(2, [1, 1])
+            io_write(2, [1, 1])
             add_fingerprint()
-            leds_set(2, [0, 0])
-        else:
+            io_write(2, [0, 0])
             fprints = load_fprints()
+        else:
+            print "Verifying, finger please"
             result = dev.identify_finger(fprints)
-            if result[0]:
-                print "True"
-                leds_set(2, [0, 1])
-                time.sleep(3)
-                leds_set(2, [0, 0])
-            else:
+            if result[0] is None:
                 print "False"
-                leds_set(2, [1, 0])
-                time.sleep(3)
-                leds_set(2, [0, 0])
+                io_write(2, [1, 0])
+                time.sleep(0.5)
+                io_write(2, [0, 0])
+            else:
+                print "True"
+                io_write(2, [0, 1])
+                time.sleep(0.5)
+                io_write(2, [0, 0])
 # dev.close()
 # pyfprint.fp_exit()
