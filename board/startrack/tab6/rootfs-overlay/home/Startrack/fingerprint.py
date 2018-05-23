@@ -4,14 +4,13 @@ import pyfprint
 import os.path
 import spidev
 import time
-import signal
-from multiprocessing import Pool
+import shutil
 
 
 def export_pins(pins):
     try:
         f = open("/sys/class/gpio/export", "w")
-        f.write(str(pins))	
+        f.write(str(pins))
         f.close()
     except IOError:
         print "GPIO %s already exists, so skipping export gpio" % (str(pins), )
@@ -134,7 +133,6 @@ def makedir():
 
 
 def init():
-    global device_opened, dev
     pyfprint.fp_init()
     devices = pyfprint.discover_devices()
     dev = devices[0]
@@ -190,16 +188,22 @@ while True:
             fprints = load_fprints()
         else:
             print "Verifying, finger please"
-            result = dev.identify_finger(fprints)
+            try:
+                result = dev.identify_finger(fprints)
+            except pyfprint.pyfprint.FprintException:
+                print "Incompatible"
+                shutil.rmtree('fingerprints')
+                continue
+
             if result[0] is None:
                 print "False"
-                io_write(2, [1, 0])
+                io_write(2, [1, 0, 1, 0])
                 time.sleep(0.5)
-                io_write(2, [0, 0])
+                io_write(2, [0, 0, 0, 0])
             else:
                 print "True"
-                io_write(2, [0, 1])
+                io_write(2, [0, 1, 0, 1])
                 time.sleep(0.5)
-                io_write(2, [0, 0])
+                io_write(2, [0, 0, 0, 0])
 # dev.close()
 # pyfprint.fp_exit()
