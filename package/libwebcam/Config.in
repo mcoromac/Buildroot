@@ -1,0 +1,9 @@
+config BR2_PACKAGE_LIBWEBCAM
+	bool "libwebcam"
+	select BR2_PACKAGE_LIBXML2
+	help
+	  This project was first developed by logitech and it was
+	  hosted at a svn repo in the quickcamteam site, but since then
+	   logitech shutdown the site.
+
+	  https://sourceforge.net/projects/libwebcam/?source=navbar
