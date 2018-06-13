@@ -130,3 +130,5 @@ while True:
     elif operation == "OFF":
         pin_array = [0, 0, 0, 0, 0, 0]
         io_write(1, pin_array)
+    elif operation == "READ":
+        print io_read()
