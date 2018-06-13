@@ -1,0 +1,9 @@
+config BR2_PACKAGE_PYTHON_PASSPORT_EYE
+	bool "python-passport-eye"
+	select BR2_PACKAGE_PYTHON_BCRYPT 
+	help
+	  The package provides tools for recognizing machine readable 
+	  zones (MRZ) from scanned identification documents.
+
+	  https://pypi.org/project/PassportEye/
+
