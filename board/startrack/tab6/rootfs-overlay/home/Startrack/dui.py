@@ -39,7 +39,7 @@ def read_pins(pin_no):
     gpiopin = "gpio%s" % (str(pin_no), )
     pin = open("/sys/class/gpio/"+gpiopin+"/value", "r")
     value = pin.read()
-    print "The value on the PIN %s is : %s" % (str(pin_no), str(value))
+    # print "The value on the PIN %s is : %s" % (str(pin_no), str(value))
     pin.close()
     return int(value)
 
@@ -124,24 +124,21 @@ def load_font():
         print "Font: Image not found"
         return 0
     font_image_grayscale = cv2.cvtColor(font_image, cv2.COLOR_BGR2GRAY)
-    # cv2.imwrite("/mnt/usb4GB/controus_grayscale.jpg", font_image_grayscale)
 
     font_image_binary = cv2.threshold(font_image_grayscale, 10, 255, cv2.THRESH_BINARY_INV)[1]
-    # cv2.imwrite("/mnt/usb4GB/controus_binary_inverted.jpg", font_image_binary)
 
     font_contours = cv2.findContours(font_image_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     font_contours = font_contours[1]
 
-    # cv2.imwrite("/mnt/usb4GB/draw_font_contours.jpg", cv2.drawContours(font_image.copy(), font_contours, -1, (0, 255, 0), 3))
+    # draw_image_contours = cv2.drawContours(font_image.copy(), font_contours, -1, (0, 255, 0), 1)
+    # cv2.imwrite("/mnt/usb4GB/draw_font_contours.jpg", draw_image_contours)
 
-    # print "Contours found in font: " + str(len(font_contours))
     index = 0
     for contour in font_contours:
         index = index + 1
         (x, y, w, h) = cv2.boundingRect(contour)
         letter_font = font_image[y:y + h, x:x + w]
         letter_font = cv2.resize(letter_font, (16, 25))
-        # cv2.imwrite("/mnt/usb4GB/Contours_Font/" + str(index) + "_contour.jpg", letter_font)
         contours_font.append(letter_font)
     return contours_font
 
@@ -150,35 +147,35 @@ def process_image(frame):
     cropped_img = frame
     x_positions = []
     gray_image = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-    # cv2.imwrite("/mnt/usb4GB/image_grayscale.jpg", gray_image)
+    # threshold = 80, 113 on oddice in front of power supply,
+    image_binary = cv2.threshold(gray_image, 113, 255, cv2.THRESH_BINARY_INV)[1]
 
-    image_binary = cv2.threshold(gray_image, 80, 255, cv2.THRESH_BINARY_INV)[1]
-    # cv2.imwrite("/mnt/usb4GB/image_binary_inverted.jpg", image_binary)
+    # cv2.imwrite("/mnt/usb4GB/image_binary.jpg", image_binary)
 
     image_contours = cv2.findContours(image_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_contours = image_contours[1]
 
-    draw_image_contours = cv2.drawContours(cropped_img.copy(), image_contours, -1, (0, 255, 0), 1)
-    # cv2.imwrite("/mnt/usb4GB/draw_font_contours.jpg", draw_image_contours)
-
-    # print "Contours found in image: " + str(len(image_contours))
+    # draw_image_contours = cv2.drawContours(frame.copy(), image_contours, -1, (0, 255, 0), 1)
+    # cv2.imwrite("/mnt/usb4GB/draw_image_contours.jpg", draw_image_contours)
 
     contours_image = []
 
     for index, contour in enumerate(image_contours):
         area = cv2.contourArea(contour)
-        if area > 50:
+        #50
+        if area > 40:
             (x, y, w, h) = cv2.boundingRect(contour)
             letter_image = cropped_img[y:y + h, x:x + w]
+            # cv2.imwrite("/mnt/usb4GB/Images/" + str(index) + ".jpg", letter_image)
             letter_image = cv2.resize(letter_image, (16, 25))
-            # cv2.imwrite("/mnt/usb4GB/Contours_Image/" + str(index) + "_area_" + str(area) + ".jpg", letter_image)
             x_positions.append(x)
             contours_image.append(letter_image)
 
     sorted_contours = sort_contours(x_positions, contours_image)
 
-    # for (index, contour) in enumerate(sorted_contours):
-    # cv2.imwrite("/mnt/usb4GB/Contours_Image/" + str(index) + ".jpg", contour)
+    # for (index, n) in enumerate(sorted_contours):
+    #    cv2.imwrite("/mnt/usb4GB/Images/" + str(index) + ".jpg", n)
+
     return sorted_contours
 
 
@@ -196,37 +193,35 @@ def match_characters(dictionary, characters):
 
 
 def print_characters(letters):
-    text = ""
+    resulting_text = ""
     font_template = [">", "<", "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C",
                      "B", "A", "Z", "Y", "X", "W", "V", "U", "T", "S", "R", "Q", "P",
                      "O", "7", "6", "5", "4", "3", "1", "9", "8", "2", "0"]
     for index in letters:
-        # print index
         if font_template[index] == "O":
-            text = text + "0"
+            resulting_text = resulting_text + "0"
         else:
-            text = text + font_template[index]
+            resulting_text = resulting_text + font_template[index]
     print text
-    return text
+    return resulting_text
 
 
 # IDGTM = Guatemala, IDSLV = El Salvador, I<PER
-# I<PER00000000<5
-# I<PER46037489<5
-def check_text(text):
-    if text == "":
+def check_text(first_line_mrz):
+    if first_line_mrz == "":
         return 0
-    elif "IDGTM" in text:
+    elif "IDGTM" in first_line_mrz:
+        number = first_line_mrz[5:14] + first_line_mrz[15:19]
+    elif "IDSLV" in first_line_mrz:
+        number = first_line_mrz[5:13] + first_line_mrz[15:16]
+    elif "I<PER" in first_line_mrz:
+        number = first_line_mrz[5:13]
+    else:
         return 0
-    elif "IDSLV" in text:
-        number = text[5:13] + text[15:16]
-        print "Resultado: " + number
-        try:
-            return int(number)
-        except ValueError:
-            return 2
-    elif "I<PER" in text:
-        return 0
+    try:
+        return int(number)
+    except ValueError:
+        return 2
 
 
 def calibrate_focus():
@@ -259,18 +254,7 @@ def camera_setup(cap):
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
 
 
-def get_mrz():
-    start = time.time()
-    cap = open_camera()
-    camera_setup(cap)
-    _, frame = cap.read()
-    if frame is None:
-        print "No frame"
-        return 1
-    end = time.time()
-    print "Time taking picture: " + str(end - start)
-    frame = frame[300:600, 0:800]
-    cap.release()
+def get_mrz(frame):
     # cv2.imwrite("/mnt/usb4GB/Original.jpg", frame)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # cv2.imwrite("/mnt/usb4GB/Gray.jpg", gray)
@@ -303,7 +287,7 @@ def get_mrz():
     height, width = 0, 0
     point_x, point_y = 0, 0
 
-    start = time.time()
+    # start = time.time()
     for c in cnts:
         (x, y, w, h) = cv2.boundingRect(c)
         if w > width and h > height:
@@ -313,9 +297,9 @@ def get_mrz():
             point_y = y
     roi = frame[point_y:point_y + (height - 60), point_x:point_x + width].copy()
     # cv2.imwrite("/mnt/usb4GB/MRZ.jpg", cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY))
-    end = time.time()
+    # end = time.time()
 
-    print "Time in for loop mrz: " + str(end - start)
+    # print "Time in for loop mrz: " + str(end - start)
     return roi
 
 
@@ -369,52 +353,69 @@ def send_dui(numero):
     print 'AT$GPOS=2,0'.encode('utf-8')
 
 
+def get_image():
+    start = time.time()
+    cap = open_camera()
+    camera_setup(cap)
+    time.sleep(0.1)
+    _, frame = cap.read()
+    if frame is None:
+        print "No frame"
+        return 1
+    time.sleep(0.1)
+    cap.release()
+    end = time.time()
+    print "Time taking image: " + str(end - start)
+    return frame[300:600, 0:800]
+
+
+def make_kernels():
+    return cv2.getStructuringElement(cv2.MORPH_RECT, (13, 5)), \
+           cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21)), \
+           cv2.getStructuringElement(cv2.MORPH_RECT, (20, 5))
+
+
 spi = spidev.SpiDev()
 spi_id = 32766
 spi.open(spi_id, 0)
 reset = 22
 slave_select = 21
 spi_setup()
-focus = "126"
-calibrate_focus()
 aciertos = 0
-iteraciones = 0
-rectKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (13, 5))
-sqKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
-second_rectKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 5))
+iteraciones = 1
+# 126 prototipo 1
+# 167 a 8.5cm del lente de la camara
+focus = "167"
+calibrate_focus()
+earlier_dui = 0
+rectKernel, sqKernel, second_rectKernel = make_kernels()
 font = load_font()
 while True:
+    # start = time.time()
     text = ""
-    start = time.time()
-    mrz = get_mrz()
-    end = time.time()
-    print "Time processing MRZ: " + str(end - start)
-    start = time.time()
-    images = process_image(mrz)
-    end = time.time()
-    print "Time processing process_image: " + str(end - start)
-    start = time.time()
-    number = match_characters(font, images)
-    end = time.time()
-    print "Time processing match_characters: " + str(end - start)
-    start = time.time()
-    dui = print_characters(number)
-    end = time.time()
-    print "Time processing print_characters: " + str(end - start)
-    # dui = check_text(print_characters(print_characters(match_characters(font, process_image(mrz)))))
-    dui_int = check_text(dui)
-    if dui_int == 0:
-        print "Empty String"
-    elif dui_int == 1:
-        print "String too short"
-    elif dui_int == 2:
-        print "Not a number"
-    else:
+    mrz = get_mrz(get_image())
+    try:
+        if mrz == 1:
+            continue
+    except ValueError:
+        pass
+    dui_int = check_text(print_characters(match_characters(font, process_image(mrz))))
+    print dui_int
+    # if dui_int == 2858418580101:
+    #   aciertos += 1
+    if dui_int != earlier_dui and dui_int != 2 and dui_int != 0:
+        # print "Sending dui"
         send_dui(dui_int)
-        io_write(1, [0, 1])
-        time.sleep(0.5)
-        io_write(1, [0, 0])
+        earlier_dui = dui_int
+        # io_write(1, [1, 0])
+        # time.sleep(0.5)
+        # io_write(1, [0, 0])
+    else:
+        print "Not a valid number"
+        # io_write(1, [0, 0, 1])
+        # time.sleep(0.5)
+        # io_write(1, [0, 0, 0])
+    end = time.time()
+    # print "Time processing: " + str(end - start)
+    # print "Accuracy: " + str(aciertos/float(iteraciones))
     iteraciones += 1
-    print "Iteraciones: " + str(iteraciones)
-
-
