@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import time
 import spidev
+import serial
 
 
 def export_pins(pins):
@@ -344,6 +345,20 @@ def send_dui(numero):
         VRBL[1] = int(VRBL[1], 2)
         VRBL[0] = int(VRBL[0], 2)
 
+    mensaje = 'AT$FUNC="VRBL",0,91' + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",5,' + str(VRBL[4]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",4,' + str(VRBL[3]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",3,' + str(VRBL[2]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",2,' + str(VRBL[1]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",1,' + str(VRBL[0]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$GPOS=2,0' + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
     print 'AT$FUNC="VRBL",0,91'.encode('utf-8')
     print 'AT$FUNC="VRBL",5,' + str(VRBL[4]).encode('utf-8')
     print 'AT$FUNC="VRBL",4,' + str(VRBL[3]).encode('utf-8')
@@ -375,14 +390,14 @@ def make_kernels():
            cv2.getStructuringElement(cv2.MORPH_RECT, (20, 5))
 
 
+ser = serial.Serial('/dev/ttyS0', 9600, timeout=0, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
+                    xonxoff=False, rtscts=False)
 spi = spidev.SpiDev()
 spi_id = 32766
 spi.open(spi_id, 0)
 reset = 22
 slave_select = 21
 spi_setup()
-aciertos = 0
-iteraciones = 1
 # 126 prototipo 1
 # 167 a 8.5cm del lente de la camara
 focus = "167"
@@ -391,7 +406,7 @@ earlier_dui = 0
 rectKernel, sqKernel, second_rectKernel = make_kernels()
 font = load_font()
 while True:
-    # start = time.time()
+    start = time.time()
     text = ""
     mrz = get_mrz(get_image())
     try:
@@ -401,21 +416,18 @@ while True:
         pass
     dui_int = check_text(print_characters(match_characters(font, process_image(mrz))))
     print dui_int
-    # if dui_int == 2858418580101:
-    #   aciertos += 1
     if dui_int != earlier_dui and dui_int != 2 and dui_int != 0:
         # print "Sending dui"
         send_dui(dui_int)
         earlier_dui = dui_int
-        # io_write(1, [1, 0])
-        # time.sleep(0.5)
-        # io_write(1, [0, 0])
+        io_write(1, [1, 0])
+        time.sleep(0.5)
+        io_write(1, [0, 0])
     else:
         print "Not a valid number"
-        # io_write(1, [0, 0, 1])
-        # time.sleep(0.5)
-        # io_write(1, [0, 0, 0])
+        io_write(1, [0, 1])
+        time.sleep(0.5)
+        io_write(1, [0, 0])
     end = time.time()
-    # print "Time processing: " + str(end - start)
-    # print "Accuracy: " + str(aciertos/float(iteraciones))
-    iteraciones += 1
+    print "Time processing: " + str(end - start)
+
