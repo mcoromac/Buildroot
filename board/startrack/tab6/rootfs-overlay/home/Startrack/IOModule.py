@@ -71,11 +71,34 @@ def io_read():
     return io_response
 
 
+def mask():
+    io_response = []
+    mask_pins = [0x77, 0x01, 0x00]
+    write_pins(slave_select, 0)
+    for n in mask_pins:
+        timer()
+        r = spi.xfer2([n])
+        io_response.append(r[0])
+
+    write_pins(slave_select, 1)
+    return io_response
+
+
 def reset_io_module():
     write_pins(reset, 0)
     timer()
     write_pins(reset, 1)
     timer()
+
+
+def io_write(pin_offset, pin_values):
+    for pin_index in range(len(pin_values)):
+        if pin_values[pin_index]:
+            pin_on = [0x70, pin_index + pin_offset, 0x01]
+            write_io_module(pin_on, pin_index + pin_offset, 1)
+        else:
+            pin_off = [0x70, pin_index + pin_offset, 0x00]
+            write_io_module(pin_off, pin_index + pin_offset, 0)
 
 
 def spi_setup():
@@ -103,16 +126,6 @@ def deny():
     print "deny"
 
 
-def io_write(pin_offset, pin_values):
-    for pin_index in range(len(pin_values)):
-        if pin_values[pin_index]:
-            pin_on = [0x70, pin_index + pin_offset, 0x01]
-            write_io_module(pin_on, pin_index + pin_offset, 1)
-        else:
-            pin_off = [0x70, pin_index + pin_offset, 0x00]
-            write_io_module(pin_off, pin_index + pin_offset, 0)
-
-
 spi = spidev.SpiDev()
 spi_id = 32766
 spi.open(spi_id, 0)
@@ -130,3 +143,7 @@ while True:
     elif operation == "OFF":
         pin_array = [0, 0, 0, 0, 0, 0]
         io_write(1, pin_array)
+    elif operation == "READ":
+        print io_read()
+    elif operation == "MASK":
+        print mask()

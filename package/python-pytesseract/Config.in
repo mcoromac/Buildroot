@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_PYTESSERACT
+	bool "python-pytesseract"
+	select BR2_PACKAGE_PYTHON_PILLOW
+	help
+	  Python-tesseract is an optical character recognition 
+	  (OCR) tool for python.
+
+	  https://pypi.org/project/pytesseract/
