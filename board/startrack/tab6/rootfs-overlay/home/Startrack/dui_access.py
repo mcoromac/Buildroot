@@ -73,6 +73,74 @@ def decode_key(keycode):
     return key
 
 
+def assign_variable_values(size, binary_value):
+    vrbl = [0, 0, 0, 0, 0]
+    if Size <= 16:
+        # No changes made
+        vrbl[4] = binary_value
+        vrbl[4] = int(vrbl[4], 2)
+    elif Size <= 32:
+        vrbl[4] = binary_value[Size - 16:Size]
+        vrbl[3] = binary_value[0:Size - 16]
+        vrbl[4] = int(vrbl[4], 2)
+        vrbl[3] = int(vrbl[3], 2)
+    elif Size <= 48:
+        vrbl[4] = binary_value[Size - 16:Size]
+        vrbl[3] = binary_value[Size - 32:Size - 16]
+        vrbl[2] = binary_value[0:Size - 32]
+        vrbl[4] = int(vrbl[4], 2)
+        vrbl[3] = int(vrbl[3], 2)
+        vrbl[2] = int(vrbl[2], 2)
+    elif Size <= 64:
+        vrbl[4] = binary_value[Size - 16:Size]
+        vrbl[3] = binary_value[Size - 32:Size - 16]
+        vrbl[2] = binary_value[Size - 48:Size - 32]
+        vrbl[1] = binary_value[0:Size - 48]
+        vrbl[4] = int(vrbl[4], 2)
+        vrbl[3] = int(vrbl[3], 2)
+        vrbl[2] = int(vrbl[2], 2)
+        vrbl[1] = int(vrbl[1], 2)
+    elif Size <= 80:
+        vrbl[4] = binary_value[Size - 16:Size]
+        vrbl[3] = binary_value[Size - 32:Size - 16]
+        vrbl[2] = binary_value[Size - 48:Size - 32]
+        vrbl[1] = binary_value[Size - 64:Size - 48]
+        vrbl[0] = binary_value[0:Size - 64]
+        vrbl[4] = int(vrbl[4], 2)
+        vrbl[3] = int(vrbl[3], 2)
+        vrbl[2] = int(vrbl[2], 2)
+        vrbl[1] = int(vrbl[1], 2)
+        vrbl[0] = int(vrbl[0], 2)
+    return vrbl
+
+
+def print_terminal(vrbl):
+    print('AT$FUNC="VRBL",0,91\r\n')
+    print('AT$FUNC="VRBL",5,' + str(vrbl[4]) + '\r\n')
+    print('AT$FUNC="VRBL",4,' + str(vrbl[3]) + '\r\n')
+    print('AT$FUNC="VRBL",3,' + str(vrbl[2]) + '\r\n')
+    print('AT$FUNC="VRBL",2,' + str(vrbl[1]) + '\r\n')
+    print('AT$FUNC="VRBL",1,' + str(vrbl[0]) + '\r\n')
+    print('AT$GPOS=2,0' + '\r\n')
+
+
+def print_serial_port(vrbl):
+    mensaje = 'AT$FUNC="VRBL",0,91' + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",5,' + str(vrbl[4]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",4,' + str(vrbl[3]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",3,' + str(vrbl[2]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",2,' + str(vrbl[1]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$FUNC="VRBL",1,' + str(vrbl[0]) + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+    mensaje = 'AT$GPOS=2,0' + '\r\n'
+    ser.write(mensaje.encode('utf-8'))
+
+
 infile_path = "/dev/input/event0"
 #  long int, long int, unsigned short, unsigned short, unsigned int
 #  Structure input event:time seconds(timeval),time micro seconds(timeval),type(short),code(short),value(int)
@@ -102,70 +170,11 @@ while event:
         #  27 means Enter, end of line
         elif code == 28 and check_text(number):
             number = check_text(number)
-            VRBL = [0, 0, 0, 0, 0]
-            copied_number = int(number)
-            binary_number = bin(copied_number)
-            binary_number = binary_number[2:]
+            binary_number = bin(int(number))[2:]
             Size = len(binary_number)
-            if Size <= 16:
-                # No changes made
-                VRBL[4] = binary_number
-                VRBL[4] = int(VRBL[4], 2)
-            elif Size <= 32:
-                VRBL[4] = binary_number[Size - 16:Size]
-                VRBL[3] = binary_number[0:Size - 16]
-                VRBL[4] = int(VRBL[4], 2)
-                VRBL[3] = int(VRBL[3], 2)
-            elif Size <= 48:
-                VRBL[4] = binary_number[Size - 16:Size]
-                VRBL[3] = binary_number[Size - 32:Size - 16]
-                VRBL[2] = binary_number[0:Size - 32]
-                VRBL[4] = int(VRBL[4], 2)
-                VRBL[3] = int(VRBL[3], 2)
-                VRBL[2] = int(VRBL[2], 2)
-            elif Size <= 64:
-                VRBL[4] = binary_number[Size - 16:Size]
-                VRBL[3] = binary_number[Size - 32:Size - 16]
-                VRBL[2] = binary_number[Size - 48:Size - 32]
-                VRBL[1] = binary_number[0:Size - 48]
-                VRBL[4] = int(VRBL[4], 2)
-                VRBL[3] = int(VRBL[3], 2)
-                VRBL[2] = int(VRBL[2], 2)
-                VRBL[1] = int(VRBL[1], 2)
-            elif Size <= 80:
-                VRBL[4] = binary_number[Size - 16:Size]
-                VRBL[3] = binary_number[Size - 32:Size - 16]
-                VRBL[2] = binary_number[Size - 48:Size - 32]
-                VRBL[1] = binary_number[Size - 64:Size - 48]
-                VRBL[0] = binary_number[0:Size - 64]
-                VRBL[4] = int(VRBL[4], 2)
-                VRBL[3] = int(VRBL[3], 2)
-                VRBL[2] = int(VRBL[2], 2)
-                VRBL[1] = int(VRBL[1], 2)
-                VRBL[0] = int(VRBL[0], 2)
-
-            mensaje = 'AT$FUNC="VRBL",0,91' + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$FUNC="VRBL",5,' + str(VRBL[4]) + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$FUNC="VRBL",4,' + str(VRBL[3]) + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$FUNC="VRBL",3,' + str(VRBL[2]) + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$FUNC="VRBL",2,' + str(VRBL[1]) + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$FUNC="VRBL",1,' + str(VRBL[0]) + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-            mensaje = 'AT$GPOS=2,0' + '\r\n'
-            ser.write(mensaje.encode('utf-8'))
-
-            print('AT$FUNC="VRBL",0,91\r\n')
-            print('AT$FUNC="VRBL",5,' + str(VRBL[4]) + '\r\n')
-            print('AT$FUNC="VRBL",4,' + str(VRBL[3]) + '\r\n')
-            print('AT$FUNC="VRBL",3,' + str(VRBL[2]) + '\r\n')
-            print('AT$FUNC="VRBL",2,' + str(VRBL[1]) + '\r\n')
-            print('AT$FUNC="VRBL",1,' + str(VRBL[0]) + '\r\n')
-            print('AT$GPOS=2,0' + '\r\n')
+            VRBL = assign_variable_values(Size, binary_number)
+            print_serial_port(VRBL)
+            print_terminal(VRBL)
             number = ''
         elif code == 28:
             number = ''
