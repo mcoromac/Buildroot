@@ -8,7 +8,7 @@ def check_text(mrz):
     if "IDGTM" in mrz:
         number = mrz[5:14] + mrz[15:19]
     elif "IDSLV" in mrz:
-        number = mrz[5:13] + mrz[15:16]
+        number = mrz[5:14]
     elif "I<PER" in mrz:
         number = mrz[5:13]
     else:
