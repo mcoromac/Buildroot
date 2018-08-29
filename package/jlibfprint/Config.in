@@ -1,0 +1,10 @@
+config BR2_PACKAGE_JLIBFPRINT
+	bool "jlibfprint"
+	help
+	  Jlibfprint was developed as part of a small project during our
+	   studies at the University of Naples (Università degli studi di
+	   Napoli Federico II). It was not developed in the sight to 
+	   provide a full support to the fingerprint sensors under Linux,
+	   but just as basic access to these peripherals under Java.
+	  
+	  https://github.com/eduardobogoni/
