@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_GPS3
+	bool "python-gps3"
+	depends on BR2_PACKAGE_PYTHON
+	help
+	   The simple and efficient Python2.7-3.5 client, is 
+	   pre-packaged as a threaded client
+
+	   https://github.com/wadda/gps3
