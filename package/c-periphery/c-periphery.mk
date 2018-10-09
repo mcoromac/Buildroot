@@ -25,10 +25,10 @@ define C_PERIPHERY_INSTALL_STAGING_CMDS
 endef
 
 define SAVE_OBJ_AS_SHARED_LIBRARY
-	$(HOST_DIR)/bin/arm-linux-gnueabihf-ld -shared $(@D)/obj/i2c.o -o libperipheryi2c.so
-	ld -shared $(@D)/obj/spi.o -o libperipheryspi.so
-	ld -shared $(@D)/obj/serial.o -o libperipheryserial.so
-	ld -shared $(@D)/obj/mmio.o -o libperipherymmio.so
+	$(HOST_DIR)/bin/arm-linux-gnueabihf-ld -shared $(@D)/obj/i2c.o -o $(@D)/libperipheryi2c.so
+	$(HOST_DIR)/bin/arm-linux-gnueabihf-ld -shared $(@D)/obj/spi.o -o $(@D)/libperipheryspi.so
+	$(HOST_DIR)/bin/arm-linux-gnueabihf-ld -shared $(@D)/obj/serial.o -o $(@D)/libperipheryserial.so
+	$(HOST_DIR)/bin/arm-linux-gnueabihf-ld -shared $(@D)/obj/mmio.o -o $(@D)/libperipherymmio.so
 endef
  
 C_PERIPHERY_POST_INSTALL_TARGET_HOOKS += SAVE_OBJ_AS_SHARED_LIBRARY
