@@ -1,0 +1,12 @@
+diff -ruN buildroot/output/build/libfprint-0.7.0/libfprint/img.c libfprint-0.7.0/libfprint/img.c
+--- buildroot/output/build/libfprint-0.7.0/libfprint/img.c	2017-01-05 11:18:55.000000000 -0600
++++ libfprint-0.7.0/libfprint/img.c	2018-10-24 15:24:44.532755648 -0600
+@@ -345,7 +345,7 @@
+ 	return 0;
+ }
+ 
+-int fpi_img_compare_print_data(struct fp_print_data *enrolled_print,
++API_EXPORTED int fpi_img_compare_print_data(struct fp_print_data *enrolled_print,
+ 	struct fp_print_data *new_print)
+ {
+ 	int score, max_score = 0, probe_len;
