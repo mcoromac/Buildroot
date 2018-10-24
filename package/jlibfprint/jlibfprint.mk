@@ -9,7 +9,7 @@ JLIBFPRINT_SITE = $(call github,eduardobogoni,jlibfprint,$(JLIBFPRINT_VERSION))
 JLIBFPRINT_AUTORECONF = YES
 JLIBFPRINT_SUBDIR = JlibFprint_jni
 #JLIBFPRINT_CONF_OPTS = --enable-debug-log --enable-udev-rules=no --disable-debug-log
-
+JLIBFPRINT_DEPENDENCIES = libfprint
 JLIBFPRINT_INSTALL_STAGING = YES
 
 define PREPARE_FILES_AND_FIX_DIRECTORY
