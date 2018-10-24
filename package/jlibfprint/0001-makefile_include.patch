@@ -1,0 +1,12 @@
+diff -ruN buildroot/output/build/jlibfprint-775295f08174d11d39da9e327120b128ef270fc4/JlibFprint_jni/src/Makefile.am jlibfprint-775295f08174d11d39da9e327120b128ef270fc4/JlibFprint_jni/src/Makefile.am
+--- buildroot/output/build/jlibfprint-775295f08174d11d39da9e327120b128ef270fc4/JlibFprint_jni/src/Makefile.am	2018-02-11 08:29:41.000000000 -0600
++++ jlibfprint-775295f08174d11d39da9e327120b128ef270fc4/JlibFprint_jni/src/Makefile.am	2018-10-24 16:08:02.704603513 -0600
+@@ -34,7 +34,7 @@
+ 
+ # -------------------
+ # Modify the includes of the project, add you jdk include directory and libfprint includes
+-ADD_INCLUDES=
++ADD_INCLUDES=-I/home/mariano/buildroot/board/startrack/tab6/jdk-8u181-linux-arm32-vfp-hflt/jdk1.8.0_181/include -I/home/mariano/buildroot/board/startrack/tab6/jdk-8u181-linux-arm32-vfp-hflt/jdk1.8.0_181/include/linux -I/home/mariano/buildroot/output/build/libfprint-0.7.0 -I/home/mariano/buildroot/output/build/libfprint-0.7.0/libfprint/nbis/include
+ # Example
+ # ADD_INCLUDES=-I/opt/jdk1.7.0_03/include -I/opt/jdk1.7.0_03/include/linux -I../../Downloads/libfprint-0.4.0 -I../../Downloads/libfprint-0.4.0/libfprint/nbis/include
+ #--------------------
