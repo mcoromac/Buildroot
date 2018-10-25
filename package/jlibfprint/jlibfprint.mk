@@ -17,6 +17,10 @@ define PREPARE_FILES_AND_FIX_DIRECTORY
 	libtoolize
 endef
 
+define CREATE_JAR
+	cd $(@D)/JlibFprint && \
+	mvn install
+endef
 JLIBFPRINT_PRE_CONFIGURE_HOOKS += PREPARE_FILES_AND_FIX_DIRECTORY
-
+JLIBFPRINT_POST_BUILD_HOOKS += CREATE_JAR
 $(eval $(autotools-package))
